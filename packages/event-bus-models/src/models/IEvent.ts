@@ -16,6 +16,11 @@ export interface IEvent<T = unknown> {
 	ts: number;
 
 	/**
+	 * The topic for the event.
+	 */
+	topic: string;
+
+	/**
 	 * The data for the event.
 	 */
 	data: T;

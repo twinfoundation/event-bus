@@ -1,12 +1,18 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import type { IHttpRequestContext, ISocketRoute, ITag } from "@twin.org/api-models";
+import type {
+	IHttpRequestContext,
+	INoContentResponse,
+	ISocketRoute,
+	ITag
+} from "@twin.org/api-models";
 import { ComponentFactory, Guards } from "@twin.org/core";
 import type {
 	IEventBusComponent,
 	IEventBusPublish,
 	IEventBusSubscribeRequest,
-	IEventBusSubscribeResponse
+	IEventBusSubscribeResponse,
+	IEventBusUnsubscribeRequest
 } from "@twin.org/event-bus-models";
 import { nameof } from "@twin.org/nameof";
 
@@ -45,7 +51,14 @@ export function generateSocketRoutesEventBus(
 			eventBusSubscribe(httpRequestContext, componentName, request, emitter)
 	};
 
-	return [subscribeRoute];
+	const unsubscribeRoute: ISocketRoute<IEventBusUnsubscribeRequest, INoContentResponse> = {
+		operationId: "eventBusUnsubscribe",
+		path: `${baseRouteName}/unsubscribe`,
+		handler: async (httpRequestContext, request, emitter) =>
+			eventBusUnsubscribe(httpRequestContext, componentName, request, emitter)
+	};
+
+	return [subscribeRoute, unsubscribeRoute];
 }
 
 /**
@@ -63,23 +76,44 @@ export async function eventBusSubscribe(
 	emitter: (topic: string, response: IEventBusSubscribeResponse | IEventBusPublish) => Promise<void>
 ): Promise<void> {
 	Guards.object<IEventBusSubscribeRequest>(ROUTES_SOURCE, nameof(request), request);
-	Guards.object(ROUTES_SOURCE, nameof(request.body.topic), request.body.topic);
+	Guards.stringValue(ROUTES_SOURCE, nameof(request.body.topic), request.body.topic);
 
 	const component = ComponentFactory.get<IEventBusComponent>(componentName);
-	const subscriptionId = await component.subscribe(request.body.topic, async (topic, event) => {
+	const subscriptionId = await component.subscribe(request.body.topic, async event => {
 		await emitter("publish", {
-			body: {
-				topic,
-				id: event.id,
-				ts: event.ts,
-				data: event.data
-			}
+			body: event
 		});
 	});
 
 	await emitter("subscribe", {
 		body: {
+			topic: request.body.topic,
 			subscriptionId
 		}
 	});
+}
+
+/**
+ * Unsubscribe from a topic.
+ * @param httpRequestContext The request context for the API.
+ * @param componentName The name of the component to use in the routes.
+ * @param request The request.
+ * @param emitter The emitter to send message back.
+ * @returns The response object with additional http response properties.
+ */
+export async function eventBusUnsubscribe(
+	httpRequestContext: IHttpRequestContext,
+	componentName: string,
+	request: IEventBusUnsubscribeRequest,
+	emitter: (topic: string, response: INoContentResponse) => Promise<void>
+): Promise<void> {
+	Guards.object<IEventBusUnsubscribeRequest>(ROUTES_SOURCE, nameof(request), request);
+	Guards.stringValue(
+		ROUTES_SOURCE,
+		nameof(request.body.subscriptionId),
+		request.body.subscriptionId
+	);
+
+	const component = ComponentFactory.get<IEventBusComponent>(componentName);
+	await component.unsubscribe(request.body.subscriptionId);
 }

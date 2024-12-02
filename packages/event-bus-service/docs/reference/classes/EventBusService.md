@@ -10,19 +10,19 @@ Class for performing event bus operations over web sockets.
 
 ### new EventBusService()
 
-> **new EventBusService**(`options`?): [`EventBusService`](EventBusService.md)
+> **new EventBusService**(`options`): [`EventBusService`](EventBusService.md)
 
-Create a new instance of LocalEventBusConnector.
+Create a new instance of EventBusService.
 
 #### Parameters
 
-• **options?**
+• **options**
 
 The options for the connector.
 
-• **options.loggingConnectorType?**: `string`
+• **options.eventBusConnectorType**: `string`
 
-The logging connector type, defaults to "logging".
+The event bus connector type, defaults to "event-bus".
 
 #### Returns
 

@@ -1,8 +1,11 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { BaseError, Converter, Guards, Is, RandomHelper } from "@twin.org/core";
-import type { EventBusCallback, IEvent, IEventBusConnector } from "@twin.org/event-bus-models";
-import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/logging-models";
+import { Guards } from "@twin.org/core";
+import {
+	EventBusConnectorFactory,
+	type EventBusCallback,
+	type IEventBusConnector
+} from "@twin.org/event-bus-models";
 import { nameof } from "@twin.org/nameof";
 
 /**
@@ -20,30 +23,18 @@ export class EventBusService implements IEventBusConnector {
 	public readonly CLASS_NAME: string = nameof<EventBusService>();
 
 	/**
-	 * The logger for the event bus connector.
+	 * The event bus connector.
 	 * @internal
 	 */
-	private readonly _logging?: ILoggingConnector;
+	private readonly _eventBus: IEventBusConnector;
 
 	/**
-	 * Subscriptions to the events.
-	 * @internal
-	 */
-	private readonly _subscriptions: {
-		[topic: string]: {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			[subscriberId: string]: EventBusCallback<any>;
-		};
-	};
-
-	/**
-	 * Create a new instance of LocalEventBusConnector.
+	 * Create a new instance of EventBusService.
 	 * @param options The options for the connector.
-	 * @param options.loggingConnectorType The logging connector type, defaults to "logging".
+	 * @param options.eventBusConnectorType The event bus connector type, defaults to "event-bus".
 	 */
-	constructor(options?: { loggingConnectorType?: string }) {
-		this._logging = LoggingConnectorFactory.getIfExists(options?.loggingConnectorType ?? "logging");
-		this._subscriptions = {};
+	constructor(options: { eventBusConnectorType: string }) {
+		this._eventBus = EventBusConnectorFactory.get(options.eventBusConnectorType ?? "event-bus");
 	}
 
 	/**
@@ -56,23 +47,7 @@ export class EventBusService implements IEventBusConnector {
 		Guards.stringValue(this.CLASS_NAME, nameof(topic), topic);
 		Guards.function(this.CLASS_NAME, nameof(callback), callback);
 
-		const subscriptionId = Converter.bytesToHex(RandomHelper.generate(16));
-
-		this._subscriptions[topic] ??= {};
-		this._subscriptions[topic][subscriptionId] = callback;
-
-		await this._logging?.log({
-			level: "info",
-			source: this.CLASS_NAME,
-			ts: Date.now(),
-			message: "subscribe",
-			data: {
-				topic,
-				subscriptionId
-			}
-		});
-
-		return subscriptionId;
+		return this._eventBus.subscribe(topic, callback);
 	}
 
 	/**
@@ -83,29 +58,7 @@ export class EventBusService implements IEventBusConnector {
 	public async unsubscribe(subscriptionId: string): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(subscriptionId), subscriptionId);
 
-		for (const topic in this._subscriptions) {
-			if (this._subscriptions[topic][subscriptionId]) {
-				// We found the subscription id so remove it.
-				delete this._subscriptions[topic][subscriptionId];
-
-				// If the subscriptions are empty then remove the topic as well.
-				if (Object.keys(this._subscriptions[topic]).length === 0) {
-					delete this._subscriptions[topic];
-				}
-
-				await this._logging?.log({
-					level: "info",
-					source: this.CLASS_NAME,
-					ts: Date.now(),
-					message: "unsubscribe",
-					data: {
-						topic,
-						subscriptionId
-					}
-				});
-				return;
-			}
-		}
+		return this._eventBus.unsubscribe(subscriptionId);
 	}
 
 	/**
@@ -117,44 +70,6 @@ export class EventBusService implements IEventBusConnector {
 	public async publish<T>(topic: string, data: T): Promise<void> {
 		Guards.stringValue(this.CLASS_NAME, nameof(topic), topic);
 
-		const event: IEvent<T> = {
-			id: Converter.bytesToHex(RandomHelper.generate(16)),
-			ts: Date.now(),
-			data
-		};
-
-		const hasSubscribers = !Is.empty(this._subscriptions[topic]);
-
-		await this._logging?.log({
-			level: "info",
-			source: this.CLASS_NAME,
-			ts: Date.now(),
-			message: "publish",
-			data: {
-				topic,
-				eventId: event.id,
-				subscriptionCount: hasSubscribers ? Object.keys(this._subscriptions[topic]).length : 0
-			}
-		});
-
-		if (hasSubscribers) {
-			for (const subscriberId in this._subscriptions[topic]) {
-				try {
-					await this._subscriptions[topic][subscriberId](topic, event);
-				} catch (error) {
-					await this._logging?.log({
-						level: "error",
-						source: this.CLASS_NAME,
-						ts: Date.now(),
-						message: "callback",
-						error: BaseError.fromError(error),
-						data: {
-							topic,
-							subscriberId
-						}
-					});
-				}
-			}
-		}
+		return this._eventBus.publish(topic, data);
 	}
 }

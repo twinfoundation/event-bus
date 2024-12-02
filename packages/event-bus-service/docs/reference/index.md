@@ -13,3 +13,4 @@
 
 - [generateSocketRoutesEventBus](functions/generateSocketRoutesEventBus.md)
 - [eventBusSubscribe](functions/eventBusSubscribe.md)
+- [eventBusUnsubscribe](functions/eventBusUnsubscribe.md)

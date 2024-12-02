@@ -10,6 +10,12 @@ Response to subscribe to an event bus topic.
 
 The parameters from the body.
 
+#### topic
+
+> **topic**: `string`
+
+The topic that was subscribed to.
+
 #### subscriptionId
 
 > **subscriptionId**: `string`

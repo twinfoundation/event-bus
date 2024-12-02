@@ -5,4 +5,4 @@ import type { IEvent } from "./IEvent";
 /**
  * Interface describing a event bus callback method.
  */
-export type EventBusCallback<T> = (topic: string, event: IEvent<T>) => Promise<void>;
+export type EventBusCallback<T> = (event: IEvent<T>) => Promise<void>;

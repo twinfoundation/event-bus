@@ -1,6 +1,6 @@
 # Type Alias: EventBusCallback()\<T\>
 
-> **EventBusCallback**\<`T`\>: (`topic`, `event`) => `Promise`\<`void`\>
+> **EventBusCallback**\<`T`\>: (`event`) => `Promise`\<`void`\>
 
 Interface describing a event bus callback method.
 
@@ -9,8 +9,6 @@ Interface describing a event bus callback method.
 • **T**
 
 ## Parameters
-
-• **topic**: `string`
 
 • **event**: [`IEvent`](../interfaces/IEvent.md)\<`T`\>
 

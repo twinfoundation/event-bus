@@ -13,7 +13,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        package: [event-bus-models, event-bus-connector-local, event-bus-service]
+        package: [event-bus-models, event-bus-connector-local, event-bus-service, event-bus-client]
 
     steps:
       - name: Checkout

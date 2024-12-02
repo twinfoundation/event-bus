@@ -10,6 +10,11 @@ export interface IEventBusSubscribeResponse {
 	 */
 	body: {
 		/**
+		 * The topic that was subscribed to.
+		 */
+		topic: string;
+
+		/**
 		 * The subscription id.
 		 */
 		subscriptionId: string;

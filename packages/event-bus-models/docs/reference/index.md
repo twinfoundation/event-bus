@@ -8,6 +8,7 @@
 - [IEventBusPublish](interfaces/IEventBusPublish.md)
 - [IEventBusSubscribeRequest](interfaces/IEventBusSubscribeRequest.md)
 - [IEventBusSubscribeResponse](interfaces/IEventBusSubscribeResponse.md)
+- [IEventBusUnsubscribeRequest](interfaces/IEventBusUnsubscribeRequest.md)
 
 ## Type Aliases
 

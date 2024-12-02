@@ -66,8 +66,8 @@ describe("LocalEventBusConnector", () => {
 		let receivedTopic = "";
 		const subscriptionId = await localEventBusConnector.subscribe<TestPayload>(
 			"test",
-			async (topic, event) => {
-				receivedTopic = topic;
+			async event => {
+				receivedTopic = event.topic;
 				counter = event.data.counter;
 			}
 		);
@@ -114,8 +114,8 @@ describe("LocalEventBusConnector", () => {
 		let receivedTopic = "";
 		const subscriptionId = await localEventBusConnector.subscribe<TestPayload>(
 			"test",
-			async (topic, event) => {
-				receivedTopic = topic;
+			async event => {
+				receivedTopic = event.topic;
 				counter = event.data.counter;
 			}
 		);
@@ -176,8 +176,8 @@ describe("LocalEventBusConnector", () => {
 		let receivedTopic = "";
 		const subscriptionId = await localEventBusConnector.subscribe<TestPayload>(
 			"test",
-			async (topic, event) => {
-				receivedTopic = topic;
+			async event => {
+				receivedTopic = event.topic;
 				counter = event.data.counter;
 			}
 		);
@@ -233,7 +233,7 @@ describe("LocalEventBusConnector", () => {
 	test("can log error if fail during callback", async () => {
 		const localEventBusConnector = new LocalEventBusConnector();
 
-		await localEventBusConnector.subscribe<TestPayload>("test", async (topic, event) => {
+		await localEventBusConnector.subscribe<TestPayload>("test", async event => {
 			throw new GeneralError("test", "test");
 		});
 		await localEventBusConnector.publish<TestPayload>("test", { counter: 5 });
@@ -280,7 +280,7 @@ describe("LocalEventBusConnector", () => {
 				],
 				data: {
 					topic: "test",
-					subscriberId: "00000000000000000000000000000000"
+					subscriptionId: "00000000000000000000000000000000"
 				}
 			}
 		]);

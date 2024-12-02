@@ -24,6 +24,14 @@ The timestamp for the event.
 
 ***
 
+### topic
+
+> **topic**: `string`
+
+The topic for the event.
+
+***
+
 ### data
 
 > **data**: `T`

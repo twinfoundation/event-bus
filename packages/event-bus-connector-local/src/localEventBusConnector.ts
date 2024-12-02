@@ -1,6 +1,6 @@
 // Copyright 2024 IOTA Stiftung.
 // SPDX-License-Identifier: Apache-2.0.
-import { BaseError, Converter, Guards, Is, RandomHelper } from "@twin.org/core";
+import { BaseError, Converter, Guards, RandomHelper } from "@twin.org/core";
 import type { EventBusCallback, IEvent, IEventBusConnector } from "@twin.org/event-bus-models";
 import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
@@ -32,7 +32,7 @@ export class LocalEventBusConnector implements IEventBusConnector {
 	private readonly _subscriptions: {
 		[topic: string]: {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			[subscriberId: string]: EventBusCallback<any>;
+			[subscriptionId: string]: EventBusCallback<any>;
 		};
 	};
 
@@ -120,10 +120,11 @@ export class LocalEventBusConnector implements IEventBusConnector {
 		const event: IEvent<T> = {
 			id: Converter.bytesToHex(RandomHelper.generate(16)),
 			ts: Date.now(),
+			topic,
 			data
 		};
 
-		const hasSubscribers = !Is.empty(this._subscriptions[topic]);
+		const subscriptionCount = Object.keys(this._subscriptions[topic] ?? {}).length;
 
 		await this._logging?.log({
 			level: "info",
@@ -133,14 +134,14 @@ export class LocalEventBusConnector implements IEventBusConnector {
 			data: {
 				topic,
 				eventId: event.id,
-				subscriptionCount: hasSubscribers ? Object.keys(this._subscriptions[topic]).length : 0
+				subscriptionCount
 			}
 		});
 
-		if (hasSubscribers) {
-			for (const subscriberId in this._subscriptions[topic]) {
+		if (subscriptionCount > 0) {
+			for (const subscriptionId in this._subscriptions[topic]) {
 				try {
-					await this._subscriptions[topic][subscriberId](topic, event);
+					await this._subscriptions[topic][subscriptionId](event);
 				} catch (error) {
 					await this._logging?.log({
 						level: "error",
@@ -150,7 +151,7 @@ export class LocalEventBusConnector implements IEventBusConnector {
 						error: BaseError.fromError(error),
 						data: {
 							topic,
-							subscriberId
+							subscriptionId
 						}
 					});
 				}
