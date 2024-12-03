@@ -1,1 +1,1 @@
-# @twin.org/event-bus-client - Examples
+# @twin.org/event-bus-socket-client - Examples

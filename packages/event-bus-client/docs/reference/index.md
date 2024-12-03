@@ -1,4 +1,4 @@
-# @twin.org/event-bus-client
+# @twin.org/event-bus-socket-client
 
 ## Classes
 

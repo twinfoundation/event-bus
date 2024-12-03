@@ -5,7 +5,7 @@ Event bus component implementation which can connect to endpoints
 ## Installation
 
 ```shell
-npm install @twin.org/event-bus-client
+npm install @twin.org/event-bus-socket-client
 ```
 
 ## Examples

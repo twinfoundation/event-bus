@@ -11,7 +11,7 @@ on:
           - event-bus-models
           - event-bus-connector-local
           - event-bus-service
-          - event-bus-client
+          - event-bus-socket-client
 
 jobs:
   publish:

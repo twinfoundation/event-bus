@@ -1,5 +1,5 @@
-# @twin.org/event-bus-client - Changelog
+# @twin.org/event-bus-socket-client - Changelog
 
-## v0.0.1-next.3
+## v0.0.1-next.4
 
 - Initial Release
