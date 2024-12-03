@@ -10,17 +10,17 @@ Class for performing event bus operations over web sockets.
 
 ### new EventBusService()
 
-> **new EventBusService**(`options`): [`EventBusService`](EventBusService.md)
+> **new EventBusService**(`options`?): [`EventBusService`](EventBusService.md)
 
 Create a new instance of EventBusService.
 
 #### Parameters
 
-• **options**
+• **options?**
 
 The options for the connector.
 
-• **options.eventBusConnectorType**: `string`
+• **options.eventBusConnectorType?**: `string`
 
 The event bus connector type, defaults to "event-bus".
 
