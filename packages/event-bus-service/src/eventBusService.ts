@@ -33,8 +33,8 @@ export class EventBusService implements IEventBusConnector {
 	 * @param options The options for the connector.
 	 * @param options.eventBusConnectorType The event bus connector type, defaults to "event-bus".
 	 */
-	constructor(options: { eventBusConnectorType: string }) {
-		this._eventBus = EventBusConnectorFactory.get(options.eventBusConnectorType ?? "event-bus");
+	constructor(options?: { eventBusConnectorType?: string }) {
+		this._eventBus = EventBusConnectorFactory.get(options?.eventBusConnectorType ?? "event-bus");
 	}
 
 	/**
