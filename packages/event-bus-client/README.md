@@ -1,6 +1,6 @@
-# TWIN Event Bus Client
+# TWIN Event Bus Socket Client
 
-Event bus component implementation which can connect to endpoints
+Event bus component implementation which can connect to socket endpoints
 
 ## Installation
 
