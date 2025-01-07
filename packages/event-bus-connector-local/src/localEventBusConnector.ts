@@ -4,6 +4,7 @@ import { BaseError, Converter, Guards, RandomHelper } from "@twin.org/core";
 import type { EventBusCallback, IEvent, IEventBusConnector } from "@twin.org/event-bus-models";
 import { type ILoggingConnector, LoggingConnectorFactory } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
+import type { ILocalEventBusConnectorConstructorOptions } from "./models/ILocalEventBusConnectorConstructorOptions";
 
 /**
  * Class for performing event bus operations locally.
@@ -39,9 +40,8 @@ export class LocalEventBusConnector implements IEventBusConnector {
 	/**
 	 * Create a new instance of LocalEventBusConnector.
 	 * @param options The options for the connector.
-	 * @param options.loggingConnectorType The logging connector type, defaults to "logging".
 	 */
-	constructor(options?: { loggingConnectorType?: string }) {
+	constructor(options?: ILocalEventBusConnectorConstructorOptions) {
 		this._logging = LoggingConnectorFactory.getIfExists(options?.loggingConnectorType ?? "logging");
 		this._subscriptions = {};
 	}

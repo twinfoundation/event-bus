@@ -7,3 +7,4 @@
 ## Interfaces
 
 - [IEventBusSocketClientConfig](interfaces/IEventBusSocketClientConfig.md)
+- [IEventBusSocketClientConstructorOptions](interfaces/IEventBusSocketClientConstructorOptions.md)

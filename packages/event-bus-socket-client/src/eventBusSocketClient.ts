@@ -22,7 +22,7 @@ import type {
 } from "@twin.org/event-bus-models";
 import type { ILoggingComponent } from "@twin.org/logging-models";
 import { nameof } from "@twin.org/nameof";
-import type { IEventBusSocketClientConfig } from "./models/IEventBusSocketClientConfig";
+import type { IEventBusSocketClientConstructorOptions } from "./models/IEventBusSocketClientConstructorOptions";
 
 /**
  * Event bus which publishes using REST API and websockets.
@@ -54,10 +54,8 @@ export class EventBusSocketClient extends BaseSocketClient implements IEventBusC
 	/**
 	 * Create a new instance of EventBusSocketClient.
 	 * @param options Options for the client.
-	 * @param options.loggingComponentType The type of logging component to use.
-	 * @param options.config The configuration for the client.
 	 */
-	constructor(options: { loggingComponentType?: string; config: IEventBusSocketClientConfig }) {
+	constructor(options: IEventBusSocketClientConstructorOptions) {
 		super(nameof<EventBusSocketClient>(), options?.config, "event-bus");
 
 		this._subscriptions = {};

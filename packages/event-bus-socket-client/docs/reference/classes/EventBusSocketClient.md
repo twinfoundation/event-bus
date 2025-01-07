@@ -20,17 +20,11 @@ Create a new instance of EventBusSocketClient.
 
 #### Parameters
 
-• **options**
+##### options
+
+[`IEventBusSocketClientConstructorOptions`](../interfaces/IEventBusSocketClientConstructorOptions.md)
 
 Options for the client.
-
-• **options.loggingComponentType?**: `string`
-
-The type of logging component to use.
-
-• **options.config**: [`IEventBusSocketClientConfig`](../interfaces/IEventBusSocketClientConfig.md)
-
-The configuration for the client.
 
 #### Returns
 
@@ -66,11 +60,15 @@ Subscribe to the event bus.
 
 #### Parameters
 
-• **topic**: `string`
+##### topic
+
+`string`
 
 The topic being subscribed to.
 
-• **callback**: `EventBusCallback`\<`T`\>
+##### callback
+
+`EventBusCallback`\<`T`\>
 
 The callback to be called when the event occurs on the bus.
 
@@ -94,7 +92,9 @@ Unsubscribe from the event bus.
 
 #### Parameters
 
-• **subscriptionId**: `string`
+##### subscriptionId
+
+`string`
 
 The subscription to unsubscribe.
 
@@ -122,11 +122,15 @@ Publish an event to the bus.
 
 #### Parameters
 
-• **topic**: `string`
+##### topic
+
+`string`
 
 The topic to publish.
 
-• **data**: `T`
+##### data
+
+`T`
 
 The data to publish.
 
@@ -166,7 +170,9 @@ Handle an error.
 
 #### Parameters
 
-• **err**: `IError`
+##### err
+
+`IError`
 
 The error to handle.
 

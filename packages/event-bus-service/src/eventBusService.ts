@@ -7,6 +7,7 @@ import {
 	type IEventBusConnector
 } from "@twin.org/event-bus-models";
 import { nameof } from "@twin.org/nameof";
+import type { IEventBusServiceConstructorOptions } from "./models/IEventBusServiceConstructorOptions";
 
 /**
  * Class for performing event bus operations over web sockets.
@@ -31,9 +32,8 @@ export class EventBusService implements IEventBusConnector {
 	/**
 	 * Create a new instance of EventBusService.
 	 * @param options The options for the connector.
-	 * @param options.eventBusConnectorType The event bus connector type, defaults to "event-bus".
 	 */
-	constructor(options?: { eventBusConnectorType?: string }) {
+	constructor(options?: IEventBusServiceConstructorOptions) {
 		this._eventBus = EventBusConnectorFactory.get(options?.eventBusConnectorType ?? "event-bus");
 	}
 
