@@ -1,6 +1,6 @@
 # Interface: IEventBusComponent
 
-Interface describing a event bus component.
+Interface describing an event bus component.
 
 ## Extends
 

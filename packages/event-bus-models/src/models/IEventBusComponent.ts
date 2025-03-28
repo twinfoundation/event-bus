@@ -4,7 +4,7 @@ import type { IComponent } from "@twin.org/core";
 import type { EventBusCallback } from "./eventBusCallback";
 
 /**
- * Interface describing a event bus component.
+ * Interface describing an event bus component.
  */
 export interface IEventBusComponent extends IComponent {
 	/**
