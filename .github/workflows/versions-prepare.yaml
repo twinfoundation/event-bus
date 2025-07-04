@@ -81,7 +81,7 @@ jobs:
       # Create a new branch for the version update
       - name: Create Version Update Branch
         run: |
-          BRANCH_NAME="release/versions-prepare-${{ github.event.inputs.versionType }}-${{ github.run_number }}-${{ github.run_attempt }}"
+          BRANCH_NAME="release/versions-prepare-${{ github.event.inputs.versionType }}-$(date +%s)"
           git checkout -b $BRANCH_NAME
           git push --set-upstream origin $BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
