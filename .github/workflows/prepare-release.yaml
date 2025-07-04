@@ -63,73 +63,20 @@ jobs:
       # We create an empty commit in a PR to ensure release-please runs
       # This is a commit that will be automatically signed by GitHub
       - name: Force release by adding commit
+        uses: qoomon/actions--create-commit@v1
         if: github.ref == 'refs/heads/main'
-        id: force-release
-        run: |
-          echo "Creating signed commit via GitHub API..."
+        with:
+          message: 'feat: release to production'
+          skip-empty: true
+          # run: |
+          # # GitHub Actions runners have GPG configured for the bot
+          # git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # git config --global user.name "github-actions[bot]"
+          # git config --global commit.gpgsign true
+          # git config --global user.signingkey ""
 
-          # Get current commit SHA and tree SHA
-          CURRENT_SHA=$(git rev-parse HEAD)
-          TREE_SHA=$(git rev-parse HEAD^{tree})
-
-          echo "Current SHA: $CURRENT_SHA"
-          echo "Tree SHA: $TREE_SHA"
-
-          # Use GitHub API to create a signed commit (GitHub automatically signs API-created commits)
-          NEW_COMMIT=$(gh api /repos/${{ github.repository }}/git/commits \
-            --method POST \
-            --field message="feat: release to production" \
-            --field tree="$TREE_SHA" \
-            --field parents[]="$CURRENT_SHA" \
-            --field author[name]="github-actions[bot]" \
-            --field author[email]="41898282+github-actions[bot]@users.noreply.github.com" \
-            --field committer[name]="github-actions[bot]" \
-            --field committer[email]="41898282+github-actions[bot]@users.noreply.github.com" \
-            --jq '.sha')
-
-          echo "New commit SHA: $NEW_COMMIT"
-
-          # Create temporary branch with the signed commit
-          TEMP_BRANCH="chore/release-trigger-$(date +%s)"
-          echo "Creating branch: $TEMP_BRANCH"
-
-          # Create branch reference pointing to the new signed commit
-          gh api /repos/${{ github.repository }}/git/refs \
-            --method POST \
-            --field ref="refs/heads/$TEMP_BRANCH" \
-            --field sha="$NEW_COMMIT"
-
-          # Create PR from temporary branch
-          PR_URL=$(gh pr create \
-            --title "feat: release to production" \
-            --body "🤖 Automated release trigger commit to ensure release-please runs. This PR contains a signed empty commit to trigger the release process when there are no conventional commits since the last release. ✅ Commit is signed by GitHub. 📝 This PR can be safely merged - it contains no code changes." \
-            --head "$TEMP_BRANCH" \
-            --base main \
-            --repo ${{ github.repository }})
-
-          echo "Created PR for release trigger: $PR_URL"
-
-          # Extract PR number from URL
-          PR_NUMBER=$(echo $PR_URL | grep -o '[0-9]\+$')
-          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Automatically approve the PR to speed up the release process
-      # This is necessary because PRs opened by the github-actions bot cannot be merged
-      # without approval, even with branch protection disabled
-      - name: Add reviewer to dummy PR
-        if: steps.force-release.outputs.pr_number != '' # Only run if a PR was created
-        run: |
-          # Auto-approve the PR (using the same elevated token)
-          gh pr review ${{ steps.force-release.outputs.pr_number }} --approve
-
-          # Merge PR with squash
-          gh pr merge ${{ steps.force-release.outputs.pr_number }} --squash --delete-branch
-        env:
-          # We need to use a different token for the approval as you can't approve your own PRs
-          # This token must be from a different user with write access to the repository
-          GH_TOKEN: ${{ secrets.GHA_RELEASE_TOKEN }} # Personal access token from a different user
+          # # Create empty commit with explicit signing
+          # git commit --allow-empty -m "feat: release to production" -S
 
       # Update the release-please configuration files based on the selected semver type
       - name: Update release-please prod config
