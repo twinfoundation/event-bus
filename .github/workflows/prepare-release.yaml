@@ -67,7 +67,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           message: 'feat: release to production'
-          skip-empty: true
+          allow-empty: true
           # run: |
           # # GitHub Actions runners have GPG configured for the bot
           # git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
