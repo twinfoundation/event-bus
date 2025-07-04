@@ -3,27 +3,7 @@ name: Prepare Release
 # GHA_RELEASE_TOKEN requires
 # contents: read/write
 # pull requests: read/write
-# wo          # Create PR from temporary branch
-          echo "Creating PR..."
-          PR_URL=$(gh pr create \
-            --title "feat: release to production" \
-            --body "🤖 Automated Release Trigger - This PR contains a signed empty commit to trigger the release process. ✅ Commit is signed by GitHub. 📝 This PR can be safely merged - it contains no code changes." \
-            --head "$TEMP_BRANCH" \
-            --base main \
-            --repo ${{ github.repository }})
-
-          if [ -z "$PR_URL" ]; then
-            echo "❌ Failed to create PR"
-            exit 1
-          fi
-
-          echo "✅ Created PR for release trigger: $PR_URL"
-
-          # Extract PR number from URL
-          PR_NUMBER=$(echo $PR_URL | grep -o '[0-9]\+$')
-          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GHA_RELEASE_TOKEN }}read/write
+# workflows: read/write
 
 on:
   # This workflow is triggered manually from the GitHub UI
