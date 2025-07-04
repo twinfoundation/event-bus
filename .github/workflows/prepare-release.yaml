@@ -39,7 +39,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Using GITHUB_TOKEN makes actions run as github-actions bot
+          token: ${{ secrets.GHA_RELEASE_TOKEN }} # Use elevated token that can bypass branch protection
+          fetch-depth: 0 # Fetch full history for proper commit operations
 
       # Set up Node.js environment for running npm commands
       - name: Setup Node.js
@@ -59,35 +60,45 @@ jobs:
 
       # Release please will not see any changes if next has been merged into main
       # This step ensures that release-please runs even if there are no conventional commits
-      # We create an empty commit through the GH API as using the git CLI will be prevented by branch protection rules
+      # We create an empty commit in a PR to ensure release-please runs
+      # This is a commit that will be automatically signed by GitHub
       - name: Force release by adding commit
         if: github.ref == 'refs/heads/main'
         run: |
-          # Get current commit SHA
-          CURRENT_SHA=$(gh api /repos/${{ github.repository }}/git/ref/heads/main --jq '.object.sha')
+          # Configure git with github-actions bot identity
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Get tree SHA
-          TREE_SHA=$(gh api /repos/${{ github.repository }}/git/commits/$CURRENT_SHA --jq '.tree.sha')
+          TEMP_BRANCH="chore/release-trigger-$(date +%s)"
 
-          # Create new commit
-          NEW_SHA=$(gh api /repos/${{ github.repository }}/git/commits \
-            --method POST \
-            -f message='feat: release to production' \
-            -f tree="$TREE_SHA" \
-            -f parents[]="$CURRENT_SHA" \
-            -f 'author[name]=github-actions[bot]' \
-            -f 'author[email]=41898282+github-actions[bot]@users.noreply.github.com' \
-            -f 'committer[name]=github-actions[bot]' \
-            -f 'committer[email]=41898282+github-actions[bot]@users.noreply.github.com' \
-            --jq '.sha')
+          # Create and switch to temporary branch
+          git checkout -b "$TEMP_BRANCH"
 
-          # Update branch reference with force
-          gh api /repos/${{ github.repository }}/git/refs/heads/main \
-            --method PATCH \
-            -f sha="$NEW_SHA" \
-            -F force=true
+          # Create empty commit on temporary branch
+          git commit --allow-empty -m "feat: release to production"
+
+          # Push temporary branch
+          git push origin "$TEMP_BRANCH"
+
+          # Create PR from temporary branch
+          PR_NUMBER=$(gh pr create \
+            --title "feat: release to production" \
+            --body "Automated release trigger commit to ensure release-please runs" \
+            --head "$TEMP_BRANCH" \
+            --base main \
+            --repo ${{ github.repository }} \
+            --output json | jq -r '.number')
+
+          echo "Created PR #$PR_NUMBER for release trigger"
+
+          # Auto-approve the PR (using the same elevated token)
+          gh pr review $PR_NUMBER --approve
+
+          # Merge PR with squash
+          gh pr merge $PR_NUMBER --squash --delete-branch
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          # Use elevated token that can bypass branch protection or create PRs
+          GH_TOKEN: ${{ secrets.GHA_RELEASE_TOKEN }}
 
       # Update the release-please configuration files based on the selected semver type
       - name: Update release-please prod config
@@ -115,7 +126,7 @@ jobs:
           MANIFEST_FILE=release/release-please-manifest.${{ github.event.inputs.semverType == 'prerelease' && 'prerelease' || 'prod' }}.json
 
           # Execute release-please and capture its output
-          OUTPUT=$(node_modules/.bin/release-please release-pr --config-file=${CONFIG_FILE} --manifest-file=${MANIFEST_FILE} --repo-url=${{ github.repository }} --target-branch=${{ github.ref_name }} --token=${{ secrets.GITHUB_TOKEN }})
+          OUTPUT=$(node_modules/.bin/release-please release-pr --config-file=${CONFIG_FILE} --manifest-file=${MANIFEST_FILE} --repo-url=${{ github.repository }} --target-branch=${{ github.ref_name }} --token=${{ secrets.GHA_RELEASE_TOKEN }})
 
           echo "Release-please output: $OUTPUT"
 
