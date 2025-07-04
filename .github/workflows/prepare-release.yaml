@@ -67,14 +67,14 @@ jobs:
         id: force-release
         run: |
           echo "Creating signed commit via GitHub API..."
-          
+
           # Get current commit SHA and tree SHA
           CURRENT_SHA=$(git rev-parse HEAD)
           TREE_SHA=$(git rev-parse HEAD^{tree})
-          
+
           echo "Current SHA: $CURRENT_SHA"
           echo "Tree SHA: $TREE_SHA"
-          
+
           # Use GitHub API to create a signed commit (GitHub automatically signs API-created commits)
           NEW_COMMIT=$(gh api /repos/${{ github.repository }}/git/commits \
             --method POST \
@@ -86,13 +86,13 @@ jobs:
             --field committer[name]="github-actions[bot]" \
             --field committer[email]="41898282+github-actions[bot]@users.noreply.github.com" \
             --jq '.sha')
-          
+
           echo "New commit SHA: $NEW_COMMIT"
-          
+
           # Create temporary branch with the signed commit
           TEMP_BRANCH="chore/release-trigger-$(date +%s)"
           echo "Creating branch: $TEMP_BRANCH"
-          
+
           # Create branch reference pointing to the new signed commit
           gh api /repos/${{ github.repository }}/git/refs \
             --method POST \
