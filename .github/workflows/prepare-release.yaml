@@ -107,7 +107,7 @@ jobs:
           gh pr review $PR_NUMBER --approve
 
           # Merge PR with squash
-          gh pr merge $PR_NUMBER --squash --delete-branch
+          gh pr merge $PR_NUMBER --squash --delete-branch --auto --admin
         env:
           # We need to use a different token for the approval as you can't approve your own PRs
           # This token must be from a different user with write access to the repository
