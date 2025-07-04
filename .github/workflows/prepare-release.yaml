@@ -60,23 +60,12 @@ jobs:
 
       # Release please will not see any changes if next has been merged into main
       # This step ensures that release-please runs even if there are no conventional commits
-      # We create an empty commit in a PR to ensure release-please runs
-      # This is a commit that will be automatically signed by GitHub
       - name: Force release by adding commit
         uses: qoomon/actions--create-commit@v1
         if: github.ref == 'refs/heads/main'
         with:
           message: 'feat: release to production'
           allow-empty: true
-          # run: |
-          # # GitHub Actions runners have GPG configured for the bot
-          # git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # git config --global user.name "github-actions[bot]"
-          # git config --global commit.gpgsign true
-          # git config --global user.signingkey ""
-
-          # # Create empty commit with explicit signing
-          # git commit --allow-empty -m "feat: release to production" -S
 
       # Update the release-please configuration files based on the selected semver type
       - name: Update release-please prod config
@@ -104,7 +93,7 @@ jobs:
           MANIFEST_FILE=release/release-please-manifest.${{ github.event.inputs.semverType == 'prerelease' && 'prerelease' || 'prod' }}.json
 
           # Execute release-please and capture its output
-          OUTPUT=$(node_modules/.bin/release-please release-pr --config-file=${CONFIG_FILE} --manifest-file=${MANIFEST_FILE} --repo-url=${{ github.repository }} --target-branch=${{ github.ref_name }} --token=${{ secrets.GHA_RELEASE_TOKEN }})
+          OUTPUT=$(node_modules/.bin/release-please release-pr --config-file=${CONFIG_FILE} --manifest-file=${MANIFEST_FILE} --repo-url=${{ github.repository }} --target-branch=${{ github.ref_name }} --token=${{ secrets.GITHUB_TOKEN }})
 
           echo "Release-please output: $OUTPUT"
 
