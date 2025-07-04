@@ -64,6 +64,7 @@ jobs:
       # This is a commit that will be automatically signed by GitHub
       - name: Force release by adding commit
         if: github.ref == 'refs/heads/main'
+        id: force-release
         run: |
           # Configure git with github-actions bot identity
           git config --global user.name "github-actions[bot]"
@@ -92,15 +93,25 @@ jobs:
 
           # Extract PR number from URL
           PR_NUMBER=$(echo $PR_URL | grep -o '[0-9]\+$')
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Automatically approve the PR to speed up the release process
+      # This is necessary because PRs opened by the github-actions bot cannot be merged
+      # without approval, even with branch protection disabled
+      - name: Add reviewer to dummy PR
+        if: steps.force-release.outputs.pr_number != '' # Only run if a PR was created
+        run: |
           # Auto-approve the PR (using the same elevated token)
           gh pr review $PR_NUMBER --approve
 
           # Merge PR with squash
           gh pr merge $PR_NUMBER --squash --delete-branch
         env:
-          # Use elevated token that can bypass branch protection or create PRs
-          GH_TOKEN: ${{ secrets.GHA_RELEASE_TOKEN }}
+          # We need to use a different token for the approval as you can't approve your own PRs
+          # This token must be from a different user with write access to the repository
+          GH_TOKEN: ${{ secrets.GHA_RELEASE_TOKEN }} # Personal access token from a different user
 
       # Update the release-please configuration files based on the selected semver type
       - name: Update release-please prod config
