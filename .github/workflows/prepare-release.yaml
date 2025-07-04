@@ -81,15 +81,17 @@ jobs:
           git push origin "$TEMP_BRANCH"
 
           # Create PR from temporary branch
-          PR_NUMBER=$(gh pr create \
+          PR_URL=$(gh pr create \
             --title "feat: release to production" \
             --body "Automated release trigger commit to ensure release-please runs" \
             --head "$TEMP_BRANCH" \
             --base main \
-            --repo ${{ github.repository }} \
-            --output json | jq -r '.number')
+            --repo ${{ github.repository }})
 
-          echo "Created PR #$PR_NUMBER for release trigger"
+          echo "Created PR for release trigger: $PR_URL"
+
+          # Extract PR number from URL
+          PR_NUMBER=$(echo $PR_URL | grep -o '[0-9]\+$')
 
           # Auto-approve the PR (using the same elevated token)
           gh pr review $PR_NUMBER --approve
